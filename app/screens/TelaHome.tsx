@@ -67,7 +67,7 @@ export default function NextScreen() {
     setFalando(false);
   };
 
-const CLOUDMERSIVE_API_KEY = '9866fbff-708b-46c9-bbe2-2bfd482637d3';
+const CLOUDMERSIVE_API_KEY = 'Adicionar API KEY aqui';
 
 const uploadPdf = async (uri: string) => {
   const apiUrl = 'https://api.cloudmersive.com/convert/pdf/to/txt';
