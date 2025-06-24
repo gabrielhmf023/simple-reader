@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useRef  } from 'react';
 import { View, Text, TextInput, Pressable, StyleSheet, Animated, ActivityIndicator } from 'react-native';
-import * as DocumentPicker from 'expo-document-picker';
-import * as FileSystem from 'expo-file-system';
 import * as Speech from 'expo-speech';
+import { useRouter } from 'expo-router';
 
 export default function NextScreen() {
+  const router = useRouter();
+
   const [texto, setTexto] = useState('');
   const [falando, setFalando] = useState(false);
 
@@ -15,10 +16,6 @@ export default function NextScreen() {
   const intervalo = useRef<number | null>(null);
 
   const opacidadeIcone = useRef(new Animated.Value(0)).current;
-
-  const [pdfNome, setPdfNome] = useState('');
-  const [carregando, setCarregando] = useState(false);
-  const [textoPdf, setTextoPdf] = useState('');
 
   useEffect(() => {
     Animated.timing(opacidadeIcone, {
@@ -67,56 +64,6 @@ export default function NextScreen() {
     setFalando(false);
   };
 
-const CLOUDMERSIVE_API_KEY = 'Adicionar API KEY aqui';
-
-const uploadPdf = async (uri: string) => {
-  const apiUrl = 'https://api.cloudmersive.com/convert/pdf/to/txt';
-
-  const response = await FileSystem.uploadAsync(apiUrl, uri, {
-    httpMethod: 'POST',
-    headers: {
-      'Content-Type': 'application/pdf',
-      'Apikey': CLOUDMERSIVE_API_KEY,
-    },
-    uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
-  });
-
-  return response.body;
-};
-
-const selecionarPDF = async () => {
-  try {
-    const result = await DocumentPicker.getDocumentAsync({
-      type: 'application/pdf',
-    });
-
-    if (result.assets && result.assets.length > 0) {
-      const asset = result.assets[0];
-      setPdfNome(asset.name);
-      setCarregando(true);
-
-      const textoExtraido = await uploadPdf(asset.uri);
-      setTextoPdf(textoExtraido);
-
-      setCarregando(false);
-    }
-  } catch (error) {
-    console.error('Erro:', error);
-    setCarregando(false);
-    alert('Erro ao processar o PDF.');
-  }
-};
-
-  const lerPDF = () => {
-    if (textoPdf && textoPdf.trim().length > 0) {
-      Speech.speak(textoPdf, {
-        language: 'pt-BR',
-      });
-    } else {
-      alert('Texto não encontrado.');
-    }
-  };
-
   return (
     <View style={styles.container}>
 
@@ -145,24 +92,10 @@ const selecionarPDF = async () => {
         </Pressable>
 
       <View style={styles.botaoLinha}>
-        <Pressable style={styles.botao} onPress={selecionarPDF}>
-          <Text style={styles.textoBotao}>Selecionar PDF</Text>
-        </Pressable>
-
-        <Pressable
-          style={[styles.botao, !pdfNome && styles.botaoDesabilitado]}
-          onPress={lerPDF}
-          disabled={!pdfNome}
-        >
-          <Text style={styles.textoBotao}>Ler PDF</Text>
+        <Pressable style={styles.botao} onPress={() => router.push('/screens/TelaLerPDF')}>
+          <Text style={styles.textoBotao}>Ler um PDF</Text>
         </Pressable>
       </View>
-
-      {carregando && <ActivityIndicator size="large" color="#000" style={{ marginTop: 16 }} />}
-
-      {pdfNome ? (
-        <Text style={styles.pdfNome}>📄 {pdfNome}</Text>
-      ) : null}
 
         {falando && (
           <Pressable style={[styles.botao, styles.botaoPararLeitura]} onPress={pararLeitura}>
